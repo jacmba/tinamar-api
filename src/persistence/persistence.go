@@ -11,6 +11,8 @@ import (
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+
+	"../model"
 )
 
 /*
@@ -55,23 +57,24 @@ func (p *Persistence) Connect() error {
 /*
 GetLeaderBoard returns map array with league table info from database
 */
-func (p *Persistence) GetLeaderBoard() ([]map[string]string, error) {
-	resultSet := make([]map[string]string, 0)
+func (p *Persistence) GetLeaderBoard() ([]model.Team, error) {
+	resultSet := make([]model.Team, 0)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	cur, findErr := p.boardCollection.Find(ctx, bson.D{})
+	findOptions := options.Find()
+	findOptions.SetSort(bson.M{"pos": 1})
+	cur, findErr := p.boardCollection.Find(ctx, bson.D{}, findOptions)
 
 	if findErr != nil {
-		return nil, findErr
+		return resultSet, findErr
 	}
 
-	for cur.Next(ctx) {
-		res := make(map[string]string)
+	for cur.Next(context.TODO()) {
+		var res model.Team
 		decErr := cur.Decode(&res)
-
 		if decErr != nil {
-			return nil, decErr
+			return resultSet, decErr
 		}
 
 		resultSet = append(resultSet, res)
