@@ -1,15 +1,17 @@
-FROM rust:alpine
+FROM golang:alpine
 
-RUN mkdir /src
-RUN mkdir /app
+RUN mkdir -p /src
+RUN mkdir -p /app
 
 WORKDIR /src
-COPY . .
-RUN cargo install --path .
 
-RUN mv target/release/tinamar-api /app
+COPY . .
+
+RUN apk add --no-cache git
+
+RUN go get go.mongodb.org/mongo-driver/mongo
+RUN go build -o /app/tinamar-api ./src
 
 WORKDIR /app
-RUN rm -rf /src
 
 CMD ./tinamar-api
