@@ -6,6 +6,7 @@ Team - Data structure to represent teams info in league table
 type Team struct {
 	Name    string `bson:"name" json:"name"`
 	Pos     int    `bson:"pos" json:"pos"`
+	Points  int    `bson:"points" json:"points"`
 	Played  int    `bson:"played" json:"played"`
 	Won     int    `bson:"won" json:"won"`
 	Draw    int    `bson:"draw" json:"draw"`
