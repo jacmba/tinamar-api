@@ -19,7 +19,9 @@ type Server struct {
 }
 
 var router = map[string]func(http.ResponseWriter, *http.Request){
-	"/league": league,
+	"/league":          getLeague,
+	"/league/results":  getResults,
+	"/league/calendar": getCalendar,
 }
 var db *persistence.Persistence
 

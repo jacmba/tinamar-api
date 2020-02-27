@@ -19,14 +19,16 @@ import (
 Persistence - Data structure to handle database access
 */
 type Persistence struct {
-	URI             string
-	client          *mongo.Client
-	database        *mongo.Database
-	boardCollection *mongo.Collection
+	URI               string
+	client            *mongo.Client
+	database          *mongo.Database
+	boardCollection   *mongo.Collection
+	fixtureCollection *mongo.Collection
 }
 
 const database = "tinamar"
 const boardCollection = "league_board"
+const fixtureCollection = "fixtures"
 
 /*
 Connect initiates connection to MongoDB instance
@@ -50,6 +52,7 @@ func (p *Persistence) Connect() error {
 
 	p.database = client.Database(database)
 	p.boardCollection = p.database.Collection(boardCollection)
+	p.fixtureCollection = p.database.Collection(fixtureCollection)
 
 	return nil
 }
@@ -72,6 +75,51 @@ func (p *Persistence) GetLeaderBoard() ([]model.Team, error) {
 
 	for cur.Next(context.TODO()) {
 		var res model.Team
+		decErr := cur.Decode(&res)
+		if decErr != nil {
+			return resultSet, decErr
+		}
+
+		resultSet = append(resultSet, res)
+	}
+
+	return resultSet, nil
+}
+
+/*
+GetResults returns all played fixtures
+*/
+func (p *Persistence) GetResults() ([]model.Fixture, error) {
+	return p.GetFixtures(true)
+}
+
+/*
+GetCalendar returns all future fixtures
+*/
+func (p *Persistence) GetCalendar() ([]model.Fixture, error) {
+	return p.GetFixtures(false)
+}
+
+/*
+GetFixtures returns all fixtures matching "played" flag
+*/
+func (p *Persistence) GetFixtures(played bool) ([]model.Fixture, error) {
+	resultSet := make([]model.Fixture, 0)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	findOptions := options.Find()
+	findOptions.SetSort(bson.M{"round": 1, "datetime": 1})
+	filter := bson.M{"played": played}
+
+	cur, findErr := p.fixtureCollection.Find(ctx, filter, findOptions)
+
+	if findErr != nil {
+		return resultSet, findErr
+	}
+
+	for cur.Next(context.TODO()) {
+		var res model.Fixture
 		decErr := cur.Decode(&res)
 		if decErr != nil {
 			return resultSet, decErr
