@@ -90,26 +90,26 @@ func (p *Persistence) GetLeaderBoard() ([]model.Team, error) {
 GetResults returns all played fixtures
 */
 func (p *Persistence) GetResults() ([]model.Fixture, error) {
-	return p.GetFixtures(true)
+	return p.GetFixtures(true, -1)
 }
 
 /*
 GetCalendar returns all future fixtures
 */
 func (p *Persistence) GetCalendar() ([]model.Fixture, error) {
-	return p.GetFixtures(false)
+	return p.GetFixtures(false, 1)
 }
 
 /*
 GetFixtures returns all fixtures matching "played" flag
 */
-func (p *Persistence) GetFixtures(played bool) ([]model.Fixture, error) {
+func (p *Persistence) GetFixtures(played bool, order int8) ([]model.Fixture, error) {
 	resultSet := make([]model.Fixture, 0)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	findOptions := options.Find()
-	findOptions.SetSort(bson.M{"round": 1, "datetime": 1})
+	findOptions.SetSort(bson.M{"round": order, "datetime": order})
 	filter := bson.M{"played": played}
 
 	cur, findErr := p.fixtureCollection.Find(ctx, filter, findOptions)
