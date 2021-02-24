@@ -5,13 +5,12 @@ RUN mkdir -p /app
 
 WORKDIR /src
 
-COPY . .
+COPY . /src
 
 RUN apk add --no-cache git
 
-RUN go get go.mongodb.org/mongo-driver/mongo
-RUN go build -o /app/tinamar-api ./src
-
+RUN go get -v
+RUN go build -o /app/tinamar-api
 WORKDIR /app
 
 CMD ./tinamar-api

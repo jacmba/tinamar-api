@@ -3,9 +3,9 @@ package main
 import (
 	"log"
 
-	"./api"
-	"./config"
-	"./persistence"
+	"tinamar-api/api"
+	"tinamar-api/config"
+	"tinamar-api/persistence"
 )
 
 func main() {

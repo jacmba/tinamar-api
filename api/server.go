@@ -7,7 +7,7 @@ import (
 	"log"
 	"net/http"
 
-	"../persistence"
+	"tinamar-api/persistence"
 )
 
 /*
